@@ -1,11 +1,15 @@
-# 🖼️ ImageCapSeg - AI-Powered Image Analysis
+# 🖼️ Image Captioning and Segmentation - AI-Powered Image Analysis
 
 [![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-v2.0+-red.svg)](https://pytorch.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-v1.25+-green.svg)](https://streamlit.io/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+
+
 A comprehensive web application that combines **Image Captioning** and **Object Segmentation** using state-of-the-art AI models. Generate natural language descriptions with BLIP and detect objects with YOLOv8 segmentation for pixel-perfect object detection and segmentation masks.
+
+Live Link : [Live App Link](https://image-captioning-and-segmentation.streamlit.app/)
 
 ## 🎯 Features
 
