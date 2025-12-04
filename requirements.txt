@@ -1,21 +1,12 @@
-# Streamlit ImageCapSeg - Essential Dependencies Only
-
-# Web Framework
 streamlit>=1.25.0
-
-# Core ML/AI Libraries  
 torch>=2.0.0
 torchvision>=0.15.0
 transformers>=4.30.0
 accelerate>=0.20.0
 safetensors>=0.3.1
-
-# Computer Vision
 opencv-python>=4.7.0
 pillow>=9.5.0
 ultralytics>=8.0.0
-
-# Essential Utilities
 numpy>=1.24.0
 requests>=2.31.0
 tqdm>=4.65.0
