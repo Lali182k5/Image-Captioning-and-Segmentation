@@ -9,7 +9,7 @@
 
 A comprehensive web application that combines **Image Captioning** and **Object Segmentation** using state-of-the-art AI models. Generate natural language descriptions with BLIP and detect objects with YOLOv8 segmentation for pixel-perfect object detection and segmentation masks.
 
-Live Link : [Live App Link](https://image-captioning-and-segmentation.streamlit.app/)
+LiveLink : [Image Captioning and Segmentation](https://image-captioning-and-segmentation.streamlit.app/)
 
 ## 🎯 Features
 
