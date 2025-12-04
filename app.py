@@ -401,7 +401,7 @@ def display_header():
     """Display the modern hero section."""
     st.markdown("""
     <div class="hero-section">
-        <div class="hero-title">🖼️ ImageCapSeg</div>
+        <div class="hero-title">🖼️ Image Captioning and Segmentation</div>
         <div class="hero-subtitle">AI-Powered Image Captioning & Segmentation</div>
         <div class="hero-tech">✨ Powered by BLIP & YOLOv8 ✨</div>
     </div>
@@ -802,26 +802,26 @@ def main():
         
         with col1:
             st.markdown("""
-            <div class="feature-card">
-                <h3>📝 Image Captioning</h3>
-                <ul>
-                    <li>Powered by BLIP model</li>
-                    <li>Natural language descriptions</li>
-                    <li>Conditional captioning support</li>
-                    <li>Adjustable caption length</li>
+            <div class="feature-card" style="background: rgba(255, 255, 255, 0.95); color: #2c3e50;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">📝 Image Captioning</h3>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Powered by BLIP model</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Natural language descriptions</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Conditional captioning support</li>
+                    <li style="padding: 0.5rem 0;">✅ High accuracy results</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown("""
-            <div class="feature-card">
-                <h3>🎯 Object Segmentation</h3>
-                <ul>
-                    <li>Powered by Detectron2</li>
-                    <li>80+ object categories (COCO)</li>
-                    <li>Instance segmentation masks</li>
-                    <li>Confidence scoring</li>
+            <div class="feature-card" style="background: rgba(255, 255, 255, 0.95); color: #2c3e50;">
+                <h3 style="color: #667eea; margin-bottom: 1rem;">🎯 Object Segmentation</h3>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Powered by YOLOv8 model</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ 80+ object categories (COCO)</li>
+                    <li style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">✅ Instance segmentation masks</li>
+                    <li style="padding: 0.5rem 0;">✅ Confidence scoring</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
