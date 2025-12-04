@@ -5,7 +5,7 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-v1.25+-green.svg)](https://streamlit.io/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-A comprehensive web application that combines **Image Captioning** and **Object Segmentation** using state-of-the-art AI models. Generate natural language descriptions and detect objects in images with pixel-perfect segmentation masks.
+A comprehensive web application that combines **Image Captioning** and **Object Segmentation** using state-of-the-art AI models. Generate natural language descriptions with BLIP and detect objects with YOLOv8 segmentation for pixel-perfect object detection and segmentation masks.
 
 ## 🎯 Features
 
@@ -15,11 +15,12 @@ A comprehensive web application that combines **Image Captioning** and **Object 
 - **Adjustable Length**: Control caption length (10-50 words)
 - **High Accuracy**: Powered by Salesforce's BLIP model
 
-### 🎯 Object Segmentation (Detectron2)
-- **Instance Segmentation**: Detect and segment individual objects
+### 🎯 Object Segmentation (YOLOv8)
+- **Instance Segmentation**: Detect and segment individual objects using YOLOv8
 - **80+ Object Classes**: COCO dataset categories (person, car, dog, etc.)
 - **Confidence Scoring**: Filter detections by confidence threshold
 - **Visual Overlays**: See segmentation masks overlaid on images
+- **Fast Inference**: Optimized for real-time processing
 
 ### 🚀 Web Interface
 - **Streamlit UI**: Clean, intuitive web interface
@@ -37,7 +38,8 @@ ImageCapSeg/
 │
 │── src/
 │   ├── captioning.py        # Image Captioning with BLIP
-│   ├── segmentation.py      # Image Segmentation with Detectron2
+│   ├── yolo_segmentation.py # Image Segmentation with YOLOv8
+│   ├── segmentation.py      # Legacy segmentation (unused)
 │   └── utils.py             # Helper functions and utilities
 │
 │── app.py                   # Streamlit web application
@@ -85,19 +87,17 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 pip install -r requirements.txt
 ```
 
-### 4. Install Detectron2
+### 4. Verify Installation
 
-Detectron2 requires special installation:
+YOLOv8 is automatically installed with the requirements. Verify the setup:
 
 ```bash
-# For CPU
-pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch2.0/index.html
+# Test the installation
+python -c "from src.yolo_segmentation import YOLOSegmenter; print('YOLOv8 ready!')"
+python -c "from src.captioning import ImageCaptioner; print('BLIP ready!')"
 
-# For GPU (CUDA 11.8)
-pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu118/torch2.0/index.html
-
-# Or build from source
-pip install 'git+https://github.com/facebookresearch/detectron2.git'
+# Optional: Test both models together
+python demo.py
 ```
 
 ### 5. Run the Application
@@ -148,11 +148,12 @@ Place test images in the `test_images/` directory to quickly test the applicatio
 - **Training**: Large-scale web data
 - **Capabilities**: Unconditional and conditional captioning
 
-#### Detectron2 (Object Segmentation)
-- **Model**: `COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x`
-- **Architecture**: Mask R-CNN with ResNet-50 backbone
+#### YOLOv8 (Object Segmentation)
+- **Model**: `yolov8n-seg.pt` (YOLOv8 Nano Segmentation)
+- **Architecture**: YOLOv8 with segmentation head
 - **Training**: COCO dataset (80 object classes)
-- **Output**: Bounding boxes, masks, and class predictions
+- **Output**: Bounding boxes, masks, class predictions, and confidence scores
+- **Advantages**: Faster inference, easier installation, better cross-platform compatibility
 
 ### Performance
 
@@ -181,38 +182,45 @@ Place test images in the `test_images/` directory to quickly test the applicatio
 You can also use the models programmatically:
 
 ```python
-from src.captioning import generate_caption
-from src.segmentation import segment_image
+from src.captioning import ImageCaptioner
+from src.yolo_segmentation import YOLOSegmenter
+
+# Initialize models
+captioner = ImageCaptioner()
+segmenter = YOLOSegmenter()
 
 # Generate caption
-caption = generate_caption("path/to/image.jpg")
+caption = captioner.generate_caption("path/to/image.jpg")
 print(f"Caption: {caption}")
 
 # Segment image
-masks, classes = segment_image("path/to/image.jpg")
-print(f"Found {len(classes)} objects")
+results = segmenter.segment_image("path/to/image.jpg")
+print(f"Found {len(results.get('labels', []))} objects")
 ```
 
 ### Advanced API
 
 ```python
 from src.captioning import ImageCaptioner
-from src.segmentation import ImageSegmenter
+from src.yolo_segmentation import YOLOSegmenter
+import cv2
 
 # Initialize models
 captioner = ImageCaptioner()
-segmenter = ImageSegmenter(score_threshold=0.7)
+segmenter = YOLOSegmenter()
 
 # Generate conditional caption
 caption = captioner.generate_conditional_caption(
-    "image.jpg", 
+    cv2.imread("image.jpg"), 
     "a photo of", 
     max_length=25
 )
 
 # Get detailed segmentation results
-masks, classes, scores, names = segmenter.segment_image("image.jpg")
-summary = segmenter.get_detection_summary("image.jpg")
+image = cv2.imread("image.jpg")
+results = segmenter.segment_image(image)
+summary = segmenter.get_detection_summary(results)
+visualized = segmenter.visualize_predictions(image, results)
 ```
 
 ## 📊 Supported Object Classes
@@ -248,11 +256,11 @@ captioner = ImageCaptioner(
     model_name="Salesforce/blip-image-captioning-large"  # Use larger model
 )
 
-# Custom segmentation model
-from src.segmentation import ImageSegmenter
-segmenter = ImageSegmenter(
-    model_config="COCO-InstanceSegmentation/mask_rcnn_X_101_32x8d_FPN_3x.yaml",
-    score_threshold=0.3
+# Custom YOLOv8 model
+from src.yolo_segmentation import YOLOSegmenter
+segmenter = YOLOSegmenter(
+    model_name="yolov8s-seg.pt",  # Use larger model (small instead of nano)
+    confidence_threshold=0.3
 )
 ```
 
@@ -269,12 +277,12 @@ export TORCH_HOME=/path/to/models  # Model cache directory
 
 ### Common Issues
 
-#### 1. Detectron2 Installation Failed
+#### 1. YOLOv8 Model Download Issues
 ```bash
-# Try installing build tools first
-pip install pybind11
-# Then install detectron2
-pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cpu/torch2.0/index.html
+# Clear model cache and retry
+rm -rf ~/.cache/ultralytics
+# Or manually download
+python -c "from ultralytics import YOLO; YOLO('yolov8n-seg.pt')"
 ```
 
 #### 2. CUDA Out of Memory
