@@ -342,19 +342,6 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 5. Push to the branch: `git push origin feature-name`
 6. Submit a pull request
 
-### Code Style
-
-We use `black` for code formatting and `flake8` for linting:
-
-```bash
-pip install black flake8
-black .
-flake8 .
-```
-
----
-
-<div align="center">
 
 **⭐ Star this repository if you find it helpful!**
 
