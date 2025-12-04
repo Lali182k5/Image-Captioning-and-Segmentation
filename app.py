@@ -827,7 +827,7 @@ def main():
             """, unsafe_allow_html=True)
         
         # Usage instructions
-        st.header("📋 How to Use")
+        st.header("📋 How to Use")        
         st.markdown("""
         1. **Upload an image** using the file uploader above
         2. **Adjust settings** in the sidebar (optional)
