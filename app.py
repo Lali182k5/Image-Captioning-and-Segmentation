@@ -1,6 +1,6 @@
 """
-ImageCapSeg - Image Captioning and Segmentation Streamlit App
-A comprehensive web application for AI-powered image analysis using BLIP and Detectron2.
+ImageCapSeg - AI-Powered Image Captioning and Segmentation
+Modern web application with BLIP captioning and YOLOv8 segmentation.
 """
 
 import streamlit as st
@@ -12,6 +12,8 @@ import cv2
 from typing import Optional, List, Dict, Any
 import time
 import io
+import base64
+import json
 
 # Add src directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -51,54 +53,291 @@ st.set_page_config(
     page_title="ImageCapSeg - AI Image Analysis",
     page_icon="🖼️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# Custom CSS for better styling
+# Modern CSS with dark mode and animations
 st.markdown("""
 <style>
-    .main-header {
-        text-align: center;
-        padding: 1rem 0;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    .stApp {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
         color: white;
-        border-radius: 10px;
+        text-align: center;
+        padding: 3rem 2rem;
+        border-radius: 20px;
         margin-bottom: 2rem;
+        animation: fadeIn 0.8s ease-in;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.95;
+        margin-bottom: 0.5rem;
+    }
+    
+    .hero-tech {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        display: inline-block;
+        margin-top: 1rem;
     }
     
     .feature-card {
-        background: #f8f9fa;
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
         padding: 1.5rem;
-        border-radius: 10px;
-        border-left: 5px solid #667eea;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
         margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
     }
     
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 1rem;
-        border-radius: 10px;
+        padding: 1.5rem;
+        border-radius: 15px;
         text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        animation: slideUp 0.6s ease-out;
+    }
+    
+    .metric-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
     
     .result-container {
-        background: #ffffff;
-        padding: 1.5rem;
-        border-radius: 10px;
+        background: linear-gradient(145deg, #ffffff, #f8f9fa);
+        padding: 2rem;
+        border-radius: 15px;
         border: 1px solid #e9ecef;
         margin: 1rem 0;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        animation: slideIn 0.5s ease-out;
+    }
+    
+    .tag {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin: 0.2rem;
+        display: inline-block;
+        animation: fadeIn 0.5s ease-in;
     }
     
     .stButton > button {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(45deg, #667eea, #764ba2);
         color: white;
         border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        font-weight: bold;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    
+    /* Side-by-side layout */
+    .side-by-side-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+    
+    @media (max-width: 768px) {
+        .side-by-side-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+    
+    .side-by-side-left,
+    .side-by-side-right {
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .result-card {
+        background: rgba(102, 126, 234, 0.03);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+    
+    .result-card h4 {
+        color: #667eea;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .objects-list {
+        margin-top: 1rem;
+    }
+    
+    .object-item {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+        color: #495057;
+    }
+    
+    .object-item:last-child {
+        border-bottom: none;
+    }
+    
+    /* Expandable tags */
+    .expandable-tag {
+        background: rgba(102, 126, 234, 0.05);
+        border-radius: 12px;
+        margin: 0.5rem 0;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .expandable-tag:hover {
+        border-color: rgba(102, 126, 234, 0.5);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    }
+    
+    .tag-header {
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        user-select: none;
+    }
+    
+    .tag-header:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+    
+    .tag-icon {
+        font-size: 0.8rem;
+        transition: transform 0.3s ease;
+        width: 1rem;
+        text-align: center;
+    }
+    
+    .tag-icon.expanded {
+        transform: rotate(90deg);
+    }
+    
+    .tag-text {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .tag-content {
+        padding: 0 1.5rem 1rem 1.5rem;
+        border-top: 1px solid rgba(102, 126, 234, 0.1);
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            max-height: 0;
+        }
+        to {
+            opacity: 1;
+            max-height: 200px;
+        }
+    }
+    
+    .download-btn {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-block;
+        margin: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .download-btn:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
     }
 </style>
+
+<script>
+function toggleTag(tagId) {
+    const content = document.getElementById('content-' + tagId);
+    const icon = document.getElementById('icon-' + tagId);
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        icon.classList.add('expanded');
+        icon.textContent = '▼';
+    } else {
+        content.style.display = 'none';
+        icon.classList.remove('expanded');
+        icon.textContent = '▶';
+    }
+}
+</script>
 """, unsafe_allow_html=True)
 
 def initialize_session_state():
@@ -111,14 +350,60 @@ def initialize_session_state():
         st.session_state.segmentation_result = None
     if 'processing_times' not in st.session_state:
         st.session_state.processing_times = {}
+    if 'visualization_image' not in st.session_state:
+        st.session_state.visualization_image = None
+
+def create_download_link(img, filename, text):
+    """Create a download link for images."""
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    href = f'<a href="data:image/png;base64,{img_str}" download="{filename}" style="text-decoration: none; background: linear-gradient(45deg, #28a745, #20c997); color: white; padding: 0.8rem 1.5rem; border-radius: 25px; font-weight: 600; display: inline-block; margin: 0.5rem;">{text}</a>'
+    return href
+
+def create_file_download_link(file_path, download_name):
+    """Create a download link for files"""
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+    
+    b64 = base64.b64encode(file_bytes).decode()
+    return f'<a href="data:file/octet-stream;base64,{b64}" download="{download_name}" class="download-btn">📥 Download {download_name}</a>'
+
+def create_side_by_side_layout(left_content, right_content):
+    """Create a side-by-side layout for results"""
+    return f"""
+    <div class="side-by-side-container">
+        <div class="side-by-side-left">
+            {left_content}
+        </div>
+        <div class="side-by-side-right">
+            {right_content}
+        </div>
+    </div>
+    """
+
+def create_expandable_tag(tag_text, content):
+    """Create an expandable tag with content"""
+    tag_id = tag_text.replace(" ", "-").lower().replace("📋", "").replace("🎯", "").replace("📈", "").strip()
+    return f"""
+    <div class="expandable-tag">
+        <div class="tag-header" onclick="toggleTag('{tag_id}')">
+            <span class="tag-icon" id="icon-{tag_id}">▶</span>
+            <span class="tag-text">{tag_text}</span>
+        </div>
+        <div class="tag-content" id="content-{tag_id}" style="display: none;">
+            {content}
+        </div>
+    </div>
+    """
 
 def display_header():
-    """Display the main header."""
+    """Display the modern hero section."""
     st.markdown("""
-    <div class="main-header">
-        <h1>🖼️ ImageCapSeg</h1>
-        <p>AI-Powered Image Captioning & Segmentation</p>
-        <p><em>Powered by BLIP & Detectron2</em></p>
+    <div class="hero-section">
+        <div class="hero-title">🖼️ ImageCapSeg</div>
+        <div class="hero-subtitle">AI-Powered Image Captioning & Segmentation</div>
+        <div class="hero-tech">✨ Powered by BLIP & YOLOv8 ✨</div>
     </div>
     """, unsafe_allow_html=True)
 
